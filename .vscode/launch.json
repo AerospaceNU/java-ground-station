@@ -6,13 +6,6 @@
     "configurations": [
         {
             "type": "java",
-            "name": "master",
-            "request": "launch",
-            "mainClass": "master",
-            "projectName": "java-ground-station_6b43f74c"
-        },
-        {
-            "type": "java",
             "name": "main",
             "request": "launch",
             "mainClass": "main",
