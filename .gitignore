@@ -1,0 +1,4 @@
+.idea/*
+!.idea/codeStyles/
+out/
+java-ground-station.iml
