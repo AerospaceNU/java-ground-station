@@ -1,9 +1,10 @@
 import javax.swing.JFrame;
 import javax.swing.JButton;
+import java.awt.event.ActionEvent;
 
-public class MainWindow {
+public class MainWindow implements java.awt.event.ActionListener {
     public JFrame frame = new JFrame();
-    public JButton button = new JButton();
+    public JButton button = new JButton("Hello World!");
 
      public MainWindow()  {
         frame.addNotify();
@@ -15,7 +16,15 @@ public class MainWindow {
 
         button.setBounds(100,160,200,40);
         button.setFocusable(false);
-        //button.addActionListener(this);
+        button.addActionListener(this);
         frame.add(button);
     }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+    if(e.getSource() == button) {
+        frame.dispose();
+        GraphWindow graphWindow = new GraphWindow();
+    }
+ }
 }
