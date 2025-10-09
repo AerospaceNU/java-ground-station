@@ -8,6 +8,20 @@
             "type": "java",
             "name": "main",
             "request": "launch",
+            "mainClass": "src.main",
+            "projectName": "java-ground-station_6b43f74c"
+        },
+        {
+            "type": "java",
+            "name": "csv",
+            "request": "launch",
+            "mainClass": "src.csv",
+            "projectName": "java-ground-station_6b43f74c"
+        },
+        {
+            "type": "java",
+            "name": "main",
+            "request": "launch",
             "mainClass": "main",
             "projectName": "java-ground-station_6b43f74c"
         }
