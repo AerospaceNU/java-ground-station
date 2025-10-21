@@ -19,10 +19,11 @@ public class MainWindow implements java.awt.event.ActionListener {
 	public JFrame frame = new JFrame();
 	public JButton button = new JButton("Hello World!");
 	JTabbedPane tabbedPane = new JTabbedPane();
-	/*private	JPanel	panel1;
-	private	JPanel	panel2;
-	private	JPanel	panel3;
-	private	JPanel	panel4;*/
+	JPanel mainPanel = new JPanel();
+	private	JPanel	panel1 = new JPanel();
+	private	JPanel	panel2 = new JPanel();
+	private	JPanel	panel3 = new JPanel();
+	private	JPanel	panel4 = new JPanel();
 
 	public MainWindow() {
 		frame.addNotify();
@@ -32,21 +33,24 @@ public class MainWindow implements java.awt.event.ActionListener {
 		frame.setVisible(true);
 		frame.toFront();
 
-		//button.setBounds(100, 160, 200, 40);
-		/*button.setFocusable(false);
-		button.addActionListener(this);*/
-		//frame.add(button);
+		mainPanel.add(panel1);
 
-		JComponent panel1 = new JPanel();
-		tabbedPane.addTab("Tab 1", null, panel1,
-				  "Does nothing");
-		tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
-		tabbedPane.setBounds(100, 160, 200 ,40);
-		frame.add(tabbedPane);
-
-
-		/*JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
+		frame.getContentPane().add(mainPanel);
+		//mainPanel.add(panel1);
+
+		/*button.setBounds(100, 160, 200, 40);
+		button.setFocusable(false);
+		button.addActionListener(this);
+		frame.add(button); */
+
+		/*tabbedPane.addTab("Tab 1", null, panel1,
+				  "Does nothing");
+		tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);*/
+
+		mainPanel.setBounds(100, 100, 420, 40);
+		tabbedPane.setBounds(0, 0, 420 ,40);
+		frame.add(tabbedPane);
 		frame.add(mainPanel);
 		
 		itemTabPanel1();
@@ -54,13 +58,10 @@ public class MainWindow implements java.awt.event.ActionListener {
 		itemTabPanel3();
 		itemTabPanel4();
 
-		JTabbedPane tabPane = new JTabbedPane();
-		tabPane.addTab( "Tab 1", panel1);
-		tabPane.addTab( "Tab 2", panel2);
-		tabPane.addTab( "Tab 3", panel3);
-		tabPane.addTab( "Tab 4", panel4);
-		mainPanel.add(tabPane);
-		frame.add(tabPane);*/
+		tabbedPane.addTab( "Tab 1", panel1);
+		tabbedPane.addTab( "Tab 2", panel2);
+		tabbedPane.addTab( "Tab 3", panel3);
+		tabbedPane.addTab( "Tab 4", panel4);
 	}
 
 
@@ -77,11 +78,10 @@ public class MainWindow implements java.awt.event.ActionListener {
 		}
 	}
 	
-	/*public void itemTabPanel1()
+	public void itemTabPanel1()
 	{
-		panel1 = new JPanel();
 		panel1.setLayout(null);
-		
+
 		JButton btn1 = new JButton("Button 1");
 		btn1.setBounds(10, 11, 89, 23);
 		panel1.add(btn1);
@@ -132,7 +132,7 @@ public class MainWindow implements java.awt.event.ActionListener {
 		JButton btn8 = new JButton("Button 8");
 		btn8.setBounds(10, 45, 89, 23);
 		panel4.add(btn8);	
-	}*/
+	}
 
 
 }
