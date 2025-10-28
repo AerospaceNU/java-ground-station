@@ -4,15 +4,14 @@ import java.awt.BorderLayout;
 //import java.awt.Color;
 
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import src.testing.GraphWindow;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -29,13 +28,7 @@ public class MainWindow implements java.awt.event.ActionListener {
 	private	JPanel	panel4 = new JPanel();
 
 	public MainWindow() {
-		/*frame.addNotify();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(400, 400);
-		frame.setLayout(null);
-		frame.setVisible(true);
-		frame.toFront();
-
+		/*
 		// mainPanel.setLayout(new BorderLayout());
 		// frame.getContentPane().add(mainPanel);
 		//mainPanel.add(panel1);
@@ -45,24 +38,6 @@ public class MainWindow implements java.awt.event.ActionListener {
 		button.addActionListener(this);
 		frame.add(button); 
 
-		tabbedPane.addTab("Tab 1", null, panel1,
-				  "Does nothing");
-		tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
-
-		//mainPanel.setBounds(100, 100, 420, 40);
-		tabbedPane.setBounds(0, 0, 420 ,40);
-		
-		itemTabPanel1();
-		itemTabPanel2();
-		itemTabPanel3();
-		itemTabPanel4();
-
-		tabbedPane.addTab( "Tab 1", panel1);
-		tabbedPane.addTab( "Tab 2", panel2);
-		tabbedPane.addTab( "Tab 3", panel3);
-		tabbedPane.addTab( "Tab 4", panel4);
-
-		frame.add(tabbedPane);
 		*/
 
 		            JFrame frame = new JFrame("Avionics Ground Station");
@@ -75,12 +50,6 @@ public class MainWindow implements java.awt.event.ActionListener {
 			itemTabPanel2();
 			itemTabPanel3();
 			itemTabPanel4();
-
-            /*JPanel panel2 = new JPanel(new BorderLayout());
-            panel2.add(new JLabel("Tab 2 uses BorderLayout"), BorderLayout.CENTER);*/
-
-            /*JPanel panel3 = new JPanel();
-            panel3.add(new JLabel("Tab 3!"));*/
 
             tabs.addTab("SillyGoose", panel1);
             tabs.addTab("Volt", panel2);
@@ -114,6 +83,17 @@ public class MainWindow implements java.awt.event.ActionListener {
 		JButton btn2 = new JButton("Button 2");
 		btn2.setBounds(10, 45, 89, 23);
 		panel1.add(btn2);
+
+		/* String name = JOptionPane.showInputDialog("Enter your name:");
+
+        // Prompt the user for their age
+        String ageString = JOptionPane.showInputDialog("Enter your age:");
+        int age = Integer.parseInt(ageString); // Convert the string input to an integer
+
+        // Display the collected information using a message dialog
+        JOptionPane.showMessageDialog(null, "Hello, " + name + "!\nYou are " + age + " years old.");*/
+
+		
 	}
 
 	public void itemTabPanel2()
