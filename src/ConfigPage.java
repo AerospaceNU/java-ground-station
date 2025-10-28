@@ -1,7 +1,7 @@
 package src;
 import com.fazecast.jSerialComm.SerialPort;
 
-public class constants {
+public class ConfigPage {
     //all of these values need to be set since they are currently just placeholders
 public static final float GROUND_ELEVATION = 0.0f;
 public static final float GROUND_TEMPERATURE = 0.0f;
