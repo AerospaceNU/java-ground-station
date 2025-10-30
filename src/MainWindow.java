@@ -8,6 +8,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+
+import com.fazecast.jSerialComm.SerialPort;
 
 import src.testing.GraphWindow;
 
@@ -16,11 +20,15 @@ import javax.swing.JButton;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainWindow implements java.awt.event.ActionListener {
 	public JFrame frame = new JFrame();
 	public JButton button = new JButton("Hello World!");
 	JTabbedPane tabbedPane = new JTabbedPane();
+	private final Map<String, SerialTab> activeTabs = new HashMap<>();
 	JPanel mainPanel = new JPanel();
 	private	JPanel	panel1 = new JPanel();
 	private	JPanel	panel2 = new JPanel();
@@ -40,7 +48,7 @@ public class MainWindow implements java.awt.event.ActionListener {
 
 		*/
 
-		            JFrame frame = new JFrame("Avionics Ground Station");
+		    JFrame frame = new JFrame("Avionics Ground Station");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(400, 300);
 
@@ -58,7 +66,44 @@ public class MainWindow implements java.awt.event.ActionListener {
 
             frame.add(tabs);
             frame.setVisible(true);
+
+			new Timer(2000, e -> checkForNewPorts()).start();
+			//SwingUtilities.invokeLater(SerialDetect::new); //calls SerialDetect class
 	}
+
+
+	private void checkForNewPorts() {
+		for (SerialPort port : SerialPort.getCommPorts()) {
+            String portName = port.getSystemPortName();
+            if (!activeTabs.containsKey(portName)) {
+                System.out.println("New serial device detected: " + portName);
+                SerialTab tab = new SerialTab(port);
+                activeTabs.put(portName, tab);
+                tabbedPane.add(portName, tab);
+            }
+        }
+
+        // removes objects and tabs by checking if they still exist or not
+        activeTabs.keySet().removeIf(portName -> {
+            boolean stillExists = Arrays.stream(SerialPort.getCommPorts())
+                                        .anyMatch(p -> p.getSystemPortName().equals(portName));
+            if (!stillExists) {
+                removeTab(portName);
+            }
+            return !stillExists;
+        });
+
+	}
+
+	private void removeTab(String portName) {
+        for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+            if (tabbedPane.getTitleAt(i).equals(portName)) {
+                tabbedPane.remove(i);
+                System.out.println("Removed tab for disconnected device: " + portName);
+                break;
+            }
+        }
+    }
 
 
 	public void actionPerformed(ActionEvent e) {
@@ -76,6 +121,7 @@ public class MainWindow implements java.awt.event.ActionListener {
 	
 	public void itemTabPanel1()
 	{
+		checkForNewPorts();
 		 panel1 = new JPanel(); // FlowLayout by default
             panel1.add(new JLabel("Tab 1 Content"));
             panel1.add(new JButton("Button 1"));
