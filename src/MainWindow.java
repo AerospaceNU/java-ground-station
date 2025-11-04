@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import javax.swing.border.Border;
 
 import com.fazecast.jSerialComm.SerialPort;
 
@@ -28,6 +29,9 @@ public class MainWindow implements java.awt.event.ActionListener {
 	public JFrame frame = new JFrame();
 	public JButton button = new JButton("Hello World!");
 	JTabbedPane tabbedPane = new JTabbedPane();
+	JTabbedPane subTabbedPane = new JTabbedPane();
+	JPanel subTab1Content = new JPanel();
+	JPanel subTab2Content = new JPanel();
 	private final Map<String, SerialTab> activeTabs = new HashMap<>();
 	JPanel mainPanel = new JPanel();
 	private	JPanel	panel1 = new JPanel();
@@ -68,7 +72,15 @@ public class MainWindow implements java.awt.event.ActionListener {
 				//tracks the tabs with activeTabs and adds a tab to the tabbedPane
 				activeTabs.put(portName, tab);
 				tabbedPane.addTab(portName, tab);
-				//panel.add(new JButton());
+
+				//sub tab content
+				subTab1Content.add(new JLabel("Content of Subtab 1"));
+    			subTab2Content.add(new JButton("TEST BUTTON!"));
+
+				//sub tabs added to each tab
+				tabbedPane.add(subTabbedPane, BorderLayout.CENTER);
+				subTabbedPane.addTab("Debug", subTab1Content);
+				subTabbedPane.addTab("Config", subTab2Content);
 
 				// updates
 				tabbedPane.revalidate();
@@ -77,8 +89,8 @@ public class MainWindow implements java.awt.event.ActionListener {
 				frame.repaint();
 			}
 			else{
-				JLabel label = new JLabel("No compatible USB devices connected.");
-				mainPanel.add(label);
+				JLabel label = new JLabel("No compatible USB devices connected. Please try again.");
+				mainPanel.add(label, BorderLayout.CENTER);
 				mainPanel.revalidate();
 			}
         }
@@ -105,7 +117,7 @@ public class MainWindow implements java.awt.event.ActionListener {
         }
     }
 
-
+	//button gets triggered
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == button) {
 			frame.dispose();
@@ -119,6 +131,7 @@ public class MainWindow implements java.awt.event.ActionListener {
 		}
 	}
 	
+	//outdated code from previous implentation. It's still a useful reference for UI building!
 	public void itemTabPanel1()
 	{
 		checkForNewPorts();
