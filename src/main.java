@@ -13,7 +13,6 @@ public class main {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 MainWindow mainWindow = new MainWindow();
-                SwingUtilities.invokeLater(MainWindow::new);
             }
     });
 }

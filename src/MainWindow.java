@@ -36,51 +36,51 @@ public class MainWindow implements java.awt.event.ActionListener {
 	private	JPanel	panel4 = new JPanel();
 
 	public MainWindow() {
-		/*
-		// mainPanel.setLayout(new BorderLayout());
-		// frame.getContentPane().add(mainPanel);
-		//mainPanel.add(panel1);
+		// build and show the UI
+		SwingUtilities.invokeLater(() -> {
+			frame.setTitle("Avionics Ground Station");
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame.setSize(600, 400);
+			frame.setLayout(new BorderLayout());
 
-		/*button.setBounds(100, 160, 200, 40);
-		button.setFocusable(false);
-		button.addActionListener(this);
-		frame.add(button); 
+			// mainPanel features tabbedPane which holds all serial tabs
+			mainPanel.setLayout(new BorderLayout());
+			mainPanel.add(tabbedPane, BorderLayout.CENTER);
+			frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
 
-		*/
+			frame.setLocationRelativeTo(null);
+			frame.setVisible(true);
 
-		    JFrame frame = new JFrame("Avionics Ground Station");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(400, 300);
-
-            JTabbedPane tabs = new JTabbedPane();
-
-			itemTabPanel1();
-			itemTabPanel2();
-			itemTabPanel3();
-			itemTabPanel4();
-
-            tabs.addTab("SillyGoose", panel1);
-            tabs.addTab("Volt", panel2);
-            tabs.addTab("Third", panel3);
-			tabs.addTab("Fourth", panel4);
-
-            frame.add(tabs);
-            frame.setVisible(true);
-
+			// starts detecting new ports every 2 seconds
 			new Timer(2000, e -> checkForNewPorts()).start();
-			//SwingUtilities.invokeLater(SerialDetect::new); //calls SerialDetect class
+		});
 	}
 
 
 	private void checkForNewPorts() {
 		for (SerialPort port : SerialPort.getCommPorts()) {
             String portName = port.getSystemPortName();
-            if (!activeTabs.containsKey(portName)) {
-                System.out.println("New serial device detected: " + portName);
-                SerialTab tab = new SerialTab(port);
-                activeTabs.put(portName, tab);
-                tabbedPane.add(portName, tab);
-            }
+			if (!activeTabs.containsKey(portName) && portName.contains("cu.usbmodem")) {
+				System.out.println("New serial device detected: " + portName);
+				//create the serial tab which will be used for active tabs
+				SerialTab tab = new SerialTab(port);
+
+				//tracks the tabs with activeTabs and adds a tab to the tabbedPane
+				activeTabs.put(portName, tab);
+				tabbedPane.addTab(portName, tab);
+				//panel.add(new JButton());
+
+				// updates
+				tabbedPane.revalidate();
+				tabbedPane.repaint();
+				frame.revalidate();
+				frame.repaint();
+			}
+			else{
+				JLabel label = new JLabel("No compatible USB devices connected.");
+				mainPanel.add(label);
+				mainPanel.revalidate();
+			}
         }
 
         // removes objects and tabs by checking if they still exist or not
@@ -93,7 +93,7 @@ public class MainWindow implements java.awt.event.ActionListener {
             return !stillExists;
         });
 
-	}
+	} 
 
 	private void removeTab(String portName) {
         for (int i = 0; i < tabbedPane.getTabCount(); i++) {
@@ -122,7 +122,7 @@ public class MainWindow implements java.awt.event.ActionListener {
 	public void itemTabPanel1()
 	{
 		checkForNewPorts();
-		 panel1 = new JPanel(); // FlowLayout by default
+		 panel1 = new JPanel(); // default
             panel1.add(new JLabel("Tab 1 Content"));
             panel1.add(new JButton("Button 1"));
 		
