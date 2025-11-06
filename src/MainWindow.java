@@ -2,12 +2,15 @@ package src;
 
 import java.awt.BorderLayout;
 //import java.awt.Color;
+import java.awt.Color;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.Border;
@@ -25,13 +28,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainWindow implements java.awt.event.ActionListener {
+public class MainWindow {
 	public JFrame frame = new JFrame();
-	public JButton button = new JButton("Hello World!");
 	JTabbedPane tabbedPane = new JTabbedPane();
-	JTabbedPane subTabbedPane = new JTabbedPane();
-	JPanel subTab1Content = new JPanel();
-	JPanel subTab2Content = new JPanel();
 	private final Map<String, SerialTab> activeTabs = new HashMap<>();
 	JPanel mainPanel = new JPanel();
 	private	JPanel	panel1 = new JPanel();
@@ -46,11 +45,13 @@ public class MainWindow implements java.awt.event.ActionListener {
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.setSize(600, 400);
 			frame.setLayout(new BorderLayout());
+			//frame.setBackground(Color.DARK_GRAY);
 
 			// mainPanel features tabbedPane which holds all serial tabs
+			tabbedPane.setBackground(Color.GRAY);
 			mainPanel.setLayout(new BorderLayout());
-			mainPanel.add(tabbedPane, BorderLayout.CENTER);
-			frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
+			//mainPanel.add(tabbedPane, BorderLayout.CENTER);
+			//frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
 
 			frame.setLocationRelativeTo(null);
 			frame.setVisible(true);
@@ -69,18 +70,23 @@ public class MainWindow implements java.awt.event.ActionListener {
 				//create the serial tab which will be used for active tabs
 				SerialTab tab = new SerialTab(port);
 
+				mainPanel.add(tabbedPane, BorderLayout.CENTER);
+				frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
+
 				//tracks the tabs with activeTabs and adds a tab to the tabbedPane
 				activeTabs.put(portName, tab);
 				tabbedPane.addTab(portName, tab);
 
 				//sub tab content
-				subTab1Content.add(new JLabel("Content of Subtab 1"));
-    			subTab2Content.add(new JButton("TEST BUTTON!"));
+				/*subTab1Content.add(new JLabel("Content of Subtab 1"));
+				subTab2Content.add(console);
+    			subTab2Content.add(submitButton);*/
 
 				//sub tabs added to each tab
-				tabbedPane.add(subTabbedPane, BorderLayout.CENTER);
+				/*tabbedPane.add(subTabbedPane, tab);
 				subTabbedPane.addTab("Debug", subTab1Content);
 				subTabbedPane.addTab("Config", subTab2Content);
+				*/
 
 				// updates
 				tabbedPane.revalidate();
@@ -90,6 +96,7 @@ public class MainWindow implements java.awt.event.ActionListener {
 			}
 			else{
 				JLabel label = new JLabel("No compatible USB devices connected. Please try again.");
+				label.setHorizontalAlignment(SwingConstants.CENTER);
 				mainPanel.add(label, BorderLayout.CENTER);
 				mainPanel.revalidate();
 			}
@@ -118,19 +125,18 @@ public class MainWindow implements java.awt.event.ActionListener {
     }
 
 	//button gets triggered
+	/* 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == button) {
-			frame.dispose();
-            /*try {
-                csv.testCSVprint();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }*/
-			GraphWindow graphWindow = new GraphWindow();
-
+		if (e.getSource() == submitButton) {
+			subTab2Content.add(l);
+			l.setText(console.getText());
+			/*cool.setHorizontalAlignment(SwingConstants.CENTER);
+				subTab2Content.add(cool, BorderLayout.CENTER);
+				mainPanel.revalidate();
 		}
-	}
-	
+	} 
+	*/
+
 	//outdated code from previous implentation. It's still a useful reference for UI building!
 	public void itemTabPanel1()
 	{
