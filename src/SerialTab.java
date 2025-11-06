@@ -32,6 +32,8 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
         port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 100, 0);
 
         //add content to the subtabs
+        //subTab1Content.setSize();
+        subTab1Content.setLayout(new BorderLayout());
         subTab1Content.add(new JScrollPane(textArea), BorderLayout.CENTER);
 		subTab2Content.add(console);
     	subTab2Content.add(submitButton);
@@ -71,5 +73,11 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 				mainPanel.revalidate();*/
 		}
 	}
+
+    public void reset(String s){
+        if (s == "--reset") {
+            //put code here
+        }
+    }
 }
 
