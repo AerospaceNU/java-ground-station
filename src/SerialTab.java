@@ -6,16 +6,22 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.io.InputStream;
+import java.io.OutputStream;
+
 
 public class SerialTab extends JPanel implements Runnable, java.awt.event.ActionListener{
+    //public SerialPort[] ports = SerialPort.getCommPorts();
+   // private SerialPort port = ports[0]; //let the user choose 
     private final SerialPort port;
     private final JTextArea textArea = new JTextArea();
     private JTabbedPane subTabbedPane = new JTabbedPane();
 	private JPanel subTab1Content = new JPanel();
 	private JPanel subTab2Content = new JPanel();
-    public JButton submitButton = new JButton("set");
+    public final JButton submitButton = new JButton("set"); // final ?
 	public JLabel l = new JLabel();
-	public static JTextField console = new JTextField(16);
+	public final static JTextField console = new JTextField(16); //final?
+
+    //OutputStream outputStream = port.getOutputStream();
 
     public SerialTab(SerialPort port) {
         this.port = port;
@@ -44,17 +50,25 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 
     @Override
     public void run() {
-        try (InputStream in = port.getInputStream()) {
+        try (InputStream in = port.getInputStream();
+        OutputStream out = port.getOutputStream();
+) {
             byte[] buffer = new byte[1024];
+            byte[] datatosend = (console.getText()).getBytes();
             while (port.isOpen()) {
-                int numRead = in.read(buffer);
-                if (numRead > 0) {
-                    String received = new String(buffer, 0, numRead);
+                int length = in.read(buffer);
+                out.write(datatosend);
+                out.flush();
+                if (length > 0) {
+                    String received = new String(buffer, 0, length);
                     SwingUtilities.invokeLater(() -> textArea.append(received));
+                    /*String sent = new String(datatosend);
+                    SwingUtilities.invokeLater(() -> textArea.append(sent));*/
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            //add another try and catch here...
+            System.err.println("Error during serial communication: " + e.getMessage());
         }
     }
 
@@ -67,7 +81,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
     public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == submitButton) {
 			subTab2Content.add(l);
-			l.setText(console.getText());
+			l.setText("Sent '" + console.getText() + "'");
 			/*cool.setHorizontalAlignment(SwingConstants.CENTER);
 				subTab2Content.add(cool, BorderLayout.CENTER);
 				mainPanel.revalidate();*/
