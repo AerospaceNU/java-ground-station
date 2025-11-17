@@ -5,6 +5,7 @@ import javax.swing.*;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -67,8 +68,22 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                 }
             }
         } catch (Exception e) {
-            //add another try and catch here...
-            System.err.println("Error during serial communication: " + e.getMessage());
+            //add another try and catch here...and simplify the existing code...
+            System.err.println("Error during serial communication: " + e.getMessage() + ". Let's try again!");
+            try (InputStream in = port.getInputStream();){
+                byte[] buffer = new byte[1024];
+                while(port.isOpen()) {
+                    int length = in.read(buffer);
+                    if (length > 0) {
+                        String recieved = new String(buffer, 0, length);
+                        SwingUtilities.invokeLater(() -> textArea.append(recieved));
+                    }
+                }
+            
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
         }
     }
 
