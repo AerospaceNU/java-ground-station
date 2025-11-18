@@ -20,7 +20,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 	private JPanel subTab2Content = new JPanel();
     public final JButton submitButton = new JButton("set"); // final ?
 	public JLabel l = new JLabel();
-	public final static JTextField console = new JTextField(16); //final?
+	public final JTextField console = new JTextField(16); //final?
 
     //OutputStream outputStream = port.getOutputStream();
 
@@ -51,15 +51,10 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 
     @Override
     public void run() {
-        try (InputStream in = port.getInputStream();
-        OutputStream out = port.getOutputStream();
-) {
+        try (InputStream in = port.getInputStream();) {
             byte[] buffer = new byte[1024];
-            byte[] datatosend = (console.getText()).getBytes();
             while (port.isOpen()) {
                 int length = in.read(buffer);
-                out.write(datatosend);
-                out.flush();
                 if (length > 0) {
                     String received = new String(buffer, 0, length);
                     SwingUtilities.invokeLater(() -> textArea.append(received));
@@ -101,6 +96,17 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 				subTab2Content.add(cool, BorderLayout.CENTER);
 				mainPanel.revalidate();*/
 		}
+        try (OutputStream out = port.getOutputStream();) {
+            byte[] datatosend = (console.getText()).getBytes();
+            //OutputStream out = port.getOutputStream();
+            out.write(datatosend);
+            out.flush();
+            String sent = new String(datatosend);
+            System.out.println("Sent data: " + sent);
+        }
+        catch(Exception e1){
+            System.err.println("Error sending data: " + e1.getMessage());
+        }
 	}
 
     public void reset(String s){
