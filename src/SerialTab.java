@@ -67,6 +67,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
             System.err.println("Error during serial communication: " + e.getMessage() + ". Let's try again!");
             try (InputStream in = port.getInputStream();){
                 byte[] buffer = new byte[1024];
+                // no && isDataAvailable(buffer) in this catch block
                 while(port.isOpen()) {
                     int length = in.read(buffer);
                     if (length > 0) {
@@ -109,8 +110,20 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
         }
 	}
 
+    // should check if data is available to read from the serial input (not working?)
+    private Boolean isDataAvailable(byte[] portData) {
+		while (port.isOpen()) {
+			if(portData == null){
+                return false;
+            }
+            else{
+                return true;
+            }
+		}
+	}
+
     public void reset(String s){
-        if (s == "--reset") {
+        if (s == "--" + ) {
             //put code here
         }
     }
