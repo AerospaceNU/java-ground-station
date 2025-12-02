@@ -21,7 +21,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
     public final JButton submitButton = new JButton("set"); // final ?
 	public JLabel l = new JLabel("Type your prompt here. It must have two parts seperated by a space.");
 	public final JTextField console = new JTextField(16); //final?
-    private int timeoutMs = 1000; //milliseconds for timeout, maybe make it final?
+    private int timeoutMs = 100; //milliseconds for timeout, maybe make it final?
 
     //OutputStream outputStream = port.getOutputStream();
 
