@@ -49,13 +49,23 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
         new Thread(this).start();
     }
 
+    // should check if data is available to read from the serial input (not working?)
+    private Boolean isDataAvailable(int len) {
+			if (len == 0){
+                return false;
+            }
+            else{
+                return true;
+            }
+	}
+
     @Override
     public void run() {
         try (InputStream in = port.getInputStream();) {
             byte[] buffer = new byte[1024];
             while (port.isOpen()) {
                 int length = in.read(buffer);
-                if (length > 0) {
+                if (isDataAvaiable(length) == true) {
                     String received = new String(buffer, 0, length);
                     SwingUtilities.invokeLater(() -> textArea.append(received));
                     /*String sent = new String(datatosend);
@@ -125,17 +135,6 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
         }
 	}
 
-    // should check if data is available to read from the serial input (not working?)
-    private Boolean isDataAvailable(byte[] portData) {
-		while (port.isOpen()) {
-			if(portData == null){
-                return false;
-            }
-            else{
-                return true;
-            }
-		}
-	}
 
     /*public void reset(String s){
         if (s == "--" + ) {
