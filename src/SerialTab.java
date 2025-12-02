@@ -19,8 +19,9 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 	private JPanel subTab1Content = new JPanel();
 	private JPanel subTab2Content = new JPanel();
     public final JButton submitButton = new JButton("set"); // final ?
-	public JLabel l = new JLabel();
+	public JLabel l = new JLabel("Type your prompt here. It must have two parts seperated by a space.");
 	public final JTextField console = new JTextField(16); //final?
+    private int timeoutMs = 1000; //milliseconds for timeout, maybe make it final?
 
     //OutputStream outputStream = port.getOutputStream();
 
@@ -36,13 +37,14 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 
         // Open the port
         port.openPort();
-        port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 100, 0);
+        port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, timeoutMs, 0);
 
         //add content to the subtabs
         //subTab1Content.setSize();
         subTab1Content.setLayout(new BorderLayout());
         subTab1Content.add(new JScrollPane(textArea), BorderLayout.CENTER);
 		subTab2Content.add(console);
+        subTab2Content.add(l);
     	subTab2Content.add(submitButton);
 
         // Start a thread to read data
@@ -65,7 +67,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
             byte[] buffer = new byte[1024];
             while (port.isOpen()) {
                 int length = in.read(buffer);
-                if (isDataAvaiable(length) == true) {
+                if (isDataAvailable(length) == true) {
                     String received = new String(buffer, 0, length);
                     SwingUtilities.invokeLater(() -> textArea.append(received));
                     /*String sent = new String(datatosend);
@@ -74,12 +76,12 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
             }
         } catch (Exception e) {
             //add another try and catch here...and simplify the existing code...
-            System.err.println("Error during serial communication: " + e.getMessage() + ". Let's try again!");
+            System.err.println("Error during serial communication: " + e.getMessage() + " Let's try again!");
             try (InputStream in = port.getInputStream();){
                 byte[] buffer = new byte[1024];
-                // no && isDataAvailable(buffer) in this catch block
+                // no isDataAvailable(length) in this catch block
                 while(port.isOpen()) {
-                    int length = in.read(buffer);
+                    int length = in.read(buffer); 
                     if (length > 0) {
                         String recieved = new String(buffer, 0, length);
                         SwingUtilities.invokeLater(() -> textArea.append(recieved));
@@ -120,7 +122,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                 System.err.println("Error sending data: " + e1.getMessage());
             }*/
 		}
-        try (OutputStream out = port.getOutputStream();) {
+        try (OutputStream out = port.getOutputStream();) { //the command prompt entered must be split into two parts with a space.
             //byte[] datatosend = (console.getText()).getBytes();
             //OutputStream out = port.getOutputStream();
             Commands command = new Commands(console.getText());
