@@ -93,16 +93,31 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 		if (e.getSource() == submitButton) {
 			subTab2Content.add(l);
 			l.setText("Sent '" + console.getText() + "'");
+            //Commands command = new Commands(console.getText());
+            //byte[] byteToSend = (command.concatenatedCommand).getBytes();
 			/*cool.setHorizontalAlignment(SwingConstants.CENTER);
 				subTab2Content.add(cool, BorderLayout.CENTER);
 				mainPanel.revalidate();*/
+           /*  try (OutputStream out = port.getOutputStream();) {
+                //byte[] datatosend = (console.getText()).getBytes();
+                //OutputStream out = port.getOutputStream();
+                out.write(byteToSend);
+                out.flush();
+                String sent = new String(byteToSend);
+                System.out.println("Sent data: " + sent);
+            }
+         catch(Exception e1){
+                System.err.println("Error sending data: " + e1.getMessage());
+            }*/
 		}
         try (OutputStream out = port.getOutputStream();) {
-            byte[] datatosend = (console.getText()).getBytes();
+            //byte[] datatosend = (console.getText()).getBytes();
             //OutputStream out = port.getOutputStream();
-            out.write(datatosend);
+            Commands command = new Commands(console.getText());
+            byte[] byteToSend = (command.concatenatedCommand).getBytes();
+            out.write(byteToSend);
             out.flush();
-            String sent = new String(datatosend);
+            String sent = new String(byteToSend);
             System.out.println("Sent data: " + sent);
         }
         catch(Exception e1){
@@ -122,10 +137,10 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 		}
 	}
 
-    public void reset(String s){
+    /*public void reset(String s){
         if (s == "--" + ) {
             //put code here
         }
-    }
+    }*/
 }
 
