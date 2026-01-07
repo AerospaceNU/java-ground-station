@@ -45,10 +45,11 @@ public class MainWindow {
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.setSize(600, 400);
 			frame.setLayout(new BorderLayout());
-			//frame.setBackground(Color.DARK_GRAY);
+			frame.setBackground(Color.BLACK);
 
 			// mainPanel features tabbedPane which holds all serial tabs
-			tabbedPane.setBackground(Color.GRAY);
+			tabbedPane.setBackground(Color.GREEN);
+			mainPanel.setBackground(Color.GRAY);
 			mainPanel.setLayout(new BorderLayout());
 			//mainPanel.add(tabbedPane, BorderLayout.CENTER);
 			//frame.getContentPane().add(mainPanel, BorderLayout.CENTER);

@@ -5,9 +5,12 @@ import javax.swing.*;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+
 
 
 public class SerialTab extends JPanel implements Runnable, java.awt.event.ActionListener{
@@ -34,6 +37,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
         add(subTabbedPane, BorderLayout.CENTER);
         subTabbedPane.addTab("Debug", subTab1Content);
         subTabbedPane.addTab("Config", subTab2Content);
+        subTabbedPane.setBackground(Color.GREEN);
 
         // Open the port
         port.openPort();
@@ -41,8 +45,10 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 
         //add content to the subtabs
         //subTab1Content.setSize();
+        //subTab1Content.setBackground(Color.DARK_GRAY);
         subTab1Content.setLayout(new BorderLayout());
         subTab1Content.add(new JScrollPane(textArea), BorderLayout.CENTER);
+        //subTab2Content.setBackground(Color.DARK_GRAY);
 		subTab2Content.add(console);
         subTab2Content.add(l);
     	subTab2Content.add(submitButton);
@@ -104,7 +110,20 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
     public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == submitButton) {
 			subTab2Content.add(l);
-			l.setText("Sent '" + console.getText() + "'");
+            int count = 0;
+
+            for (int i = 0; i < (console.getText()).length(); i++){
+                if ((console.getText()).charAt(i) == ' '){
+                    count++;
+                }
+            }
+
+            if (count == 1){
+			    l.setText("Sent '" + console.getText() + "'");
+            }
+            else{
+                l.setText("'" + console.getText() + "' didn't send as it doesn't fit the prompt format. Try again.");
+            }
             //Commands command = new Commands(console.getText());
             //byte[] byteToSend = (command.concatenatedCommand).getBytes();
 			/*cool.setHorizontalAlignment(SwingConstants.CENTER);
@@ -126,11 +145,13 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
             //byte[] datatosend = (console.getText()).getBytes();
             //OutputStream out = port.getOutputStream();
             Commands command = new Commands(console.getText());
-            byte[] byteToSend = (command.concatenatedCommand).getBytes();
+            //Charset charset = StandardCharsets.UTF_16;
+            byte[] byteToSend = (command.concatenatedCommand).getBytes(StandardCharsets.UTF_16); //use another charset?
             out.write(byteToSend);
             out.flush();
-            String sent = new String(byteToSend);
+            String sent = new String(byteToSend, StandardCharsets.UTF_16);
             System.out.println("Sent data: " + sent);
+            //System.out.println(byteToSend);
         }
         catch(Exception e1){
             System.err.println("Error sending data: " + e1.getMessage());

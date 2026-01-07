@@ -13,5 +13,7 @@ public class Commands {
         String secondCommand = splitStr[1];
 
         concatenatedCommand = "--" + firstCommand + " -set" + secondCommand; 
+
+        //check the "first command" and correspond that to a config value (i.e. "BOARD NAME"), then the second command is setting or changing what we already have
     }
 }
