@@ -84,7 +84,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
             //add another try and catch here...and simplify the existing code...
             System.err.println("Error during serial communication: " + e.getMessage() + " Let's try again!");
             try (InputStream in = port.getInputStream();){
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[2048];
                 // no isDataAvailable(length) in this catch block
                 while(port.isOpen()) {
                     int length = in.read(buffer); 
