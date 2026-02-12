@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HexFormat;
 
 
 
@@ -59,7 +60,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 
     // should check if data is available to read from the serial input (not working?)
     private Boolean isDataAvailable(int len) {
-			if (len == 0){
+			if (len <= 0){
                 return false;
             }
             else{
@@ -67,15 +68,31 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
             }
 	}
 
+    public static int findIndex(byte[] arr, int target) {
+        if (arr == null) {
+            return -1;
+        }
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] == target) {
+                return i; // Return the index of the byte[], startFlag
+            }
+        }
+        return -1; // Return -1 if the element is not found
+    }
+
     @Override
     public void run() {
         try (InputStream in = port.getInputStream();) {
-            byte[] buffer = new byte[2048];
+            byte[] buffer = new byte[17];
+            int i = 0;
             while (port.isOpen()) {
                 int length = in.read(buffer);
                 if (isDataAvailable(length) == true) {
+                    i++;
+                    String hex = String.format("%02X ", buffer[i] & 0xFF);
+                    String hexString = HexFormat.ofDelimiter(" ").formatHex(buffer);
                     String received = new String(buffer, 0, length);
-                    SwingUtilities.invokeLater(() -> textArea.append(received));
+                    SwingUtilities.invokeLater(() -> textArea.append(hexString));
                     /*String sent = new String(datatosend);
                     SwingUtilities.invokeLater(() -> textArea.append(sent));*/
                 }
@@ -84,13 +101,19 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
             //add another try and catch here...and simplify the existing code...
             System.err.println("Error during serial communication: " + e.getMessage() + " Let's try again!");
             try (InputStream in = port.getInputStream();){
-                byte[] buffer = new byte[2048];
+                byte[] buffer = new byte[17];
                 // no isDataAvailable(length) in this catch block
                 while(port.isOpen()) {
-                    int length = in.read(buffer); 
+                    //IntroRocketData rocketData; 
+                    //int startIndex = findIndex(buffer, IntroRocketData.startFlag);
+                    //int endIndex = findIndex(buffer, IntroRocketData.endFlag);
+                    //int length = in.read(buffer, startIndex, endIndex); 
+                    int length = in.read(buffer);
                     if (length > 0) {
-                        String recieved = new String(buffer, 0, length);
-                        SwingUtilities.invokeLater(() -> textArea.append(recieved));
+                        String hexString = HexFormat.ofDelimiter(" ").formatHex(buffer);
+                        String recieved = new String(buffer, 0, length, StandardCharsets.ISO_8859_1);
+                        SwingUtilities.invokeLater(() -> textArea.append(hexString));
+                        //System.out.println(length);
                     }
                 }
             
