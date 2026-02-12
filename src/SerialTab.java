@@ -70,7 +70,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
     @Override
     public void run() {
         try (InputStream in = port.getInputStream();) {
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[2048];
             while (port.isOpen()) {
                 int length = in.read(buffer);
                 if (isDataAvailable(length) == true) {
