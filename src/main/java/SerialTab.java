@@ -183,7 +183,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                         final int longitude = actualBytes[6] & 0xFF;
                         String websiteLink = GpsParser.parseAndPrint(latitude, longitude, 1);
                         String outputPath = "./src/main/java/testing/my-qrcode.png";
-                        int qrCodeSize = 400;
+                        int qrCodeSize = 200;
                         System.out.println(websiteLink);
 
                         try {
