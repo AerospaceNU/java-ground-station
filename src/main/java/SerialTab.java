@@ -31,7 +31,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
     ImageIcon icon = new ImageIcon("./src/main/java/testing/my-qrcode.png"); 
     public JLabel image = new JLabel(icon);
 	public final JTextField console = new JTextField(16); //final?
-    private int timeoutMs = 100; //milliseconds for timeout, maybe make it final?
+    private int timeoutMs = 0; //milliseconds for timeout, maybe make it final?
 
     //OutputStream outputStream = port.getOutputStream();
 
@@ -107,7 +107,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                     String hex = String.format("%02X ", buffer[i] & 0xFF);
                     String hexString = HexFormat.ofDelimiter(" ").formatHex(buffer);
                     String received = new String(buffer, 0, length);
-                    //SwingUtilities.invokeLater(() -> textArea.append(hexString));
+                    //SwingUtilities.invokeLater(() -> textArea.append(received));
 
                     // String[] parts = hexString.split(" ");
                     // List<Integer> parsedIntList = new ArrayList<>();
@@ -126,8 +126,16 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                     String parsedInt = Long.toString(value); //hex translator
                     SwingUtilities.invokeLater(() -> textArea.append(parsedInt + "\n"));
 
-                    int latitude = actualBytes[2] & 0xFF;
-                    int longitude = actualBytes[6] & 0xFF;
+                    int latitude =  ((actualBytes[5] & 0xFF) << 24) |
+                                    ((actualBytes[4] & 0xFF) << 16) |
+                                    ((actualBytes[3] & 0xFF) << 8)  |
+                                     (actualBytes[2] & 0xFF);
+
+                    int longitude = ((actualBytes[9] & 0xFF) << 24) |
+                                    ((actualBytes[8] & 0xFF) << 16) |
+                                    ((actualBytes[7] & 0xFF) << 8)  |
+                                     (actualBytes[6] & 0xFF);
+                                         
                     String websiteLink = GpsParser.parseAndPrint(latitude, longitude, 1);
                     String outputPath = "./src/main/java/testing/my-qrcode.png";
                     int qrCodeSize = 200;
@@ -160,7 +168,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                         String hex = String.format("%02X ", buffer[i] & 0xFF);
                         String hexString = HexFormat.ofDelimiter(" ").formatHex(buffer);
                         String received = new String(buffer, 0, length);
-                        //SwingUtilities.invokeLater(() -> textArea.append(hexString));
+                        //SwingUtilities.invokeLater(() -> textArea.append(received));
 
                         // String[] parts = hexString.split(" ");
                         // List<Integer> parsedIntList = new ArrayList<>();
@@ -179,8 +187,16 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                         String parsedInt = Long.toString(value); //hex translator
                         SwingUtilities.invokeLater(() -> textArea.append(parsedInt + "\n"));
 
-                        int latitude = actualBytes[2] & 0xFF;
-                        int longitude = actualBytes[6] & 0xFF;
+                        int latitude = ((actualBytes[5] & 0xFF) << 24) |
+                                       ((actualBytes[4] & 0xFF) << 16) |
+                                       ((actualBytes[3] & 0xFF) << 8)  |
+                                        (actualBytes[2] & 0xFF);
+
+                        int longitude = ((actualBytes[9] & 0xFF) << 24) |
+                                        ((actualBytes[8] & 0xFF) << 16) |
+                                        ((actualBytes[7] & 0xFF) << 8)  |
+                                         (actualBytes[6] & 0xFF);
+
                         String websiteLink = GpsParser.parseAndPrint(latitude, longitude, 1);
                         String outputPath = "./src/main/java/testing/my-qrcode.png";
                         int qrCodeSize = 200;
