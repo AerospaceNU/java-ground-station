@@ -100,7 +100,6 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
         try (InputStream in = port.getInputStream();) {
             byte[] buffer = new byte[1024];
             int i = 0;
-            int k = 0;
             while (port.isOpen()) {
                 int length = in.read(buffer);
                 if (isDataAvailable(length) == true) {
@@ -127,9 +126,8 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                     String parsedInt = Long.toString(value); //hex translator
                     SwingUtilities.invokeLater(() -> textArea.append(parsedInt + "\n"));
 
-                    final int latitude = Integer.parseInt(Integer.toString(actualBytes[2 + k]), 16) & 0xFF;
-                    final int longitude = Integer.parseInt(Integer.toString(actualBytes[6 + k]), 16) & 0xFF;
-                    k = k + 17;
+                    int latitude = actualBytes[2] & 0xFF;
+                    int longitude = actualBytes[6] & 0xFF;
                     String websiteLink = GpsParser.parseAndPrint(latitude, longitude, 1);
                     String outputPath = "./src/main/java/testing/my-qrcode.png";
                     int qrCodeSize = 200;
@@ -181,8 +179,8 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                         String parsedInt = Long.toString(value); //hex translator
                         SwingUtilities.invokeLater(() -> textArea.append(parsedInt + "\n"));
 
-                        final int latitude = actualBytes[2] & 0xFF;
-                        final int longitude = actualBytes[6] & 0xFF;
+                        int latitude = actualBytes[2] & 0xFF;
+                        int longitude = actualBytes[6] & 0xFF;
                         String websiteLink = GpsParser.parseAndPrint(latitude, longitude, 1);
                         String outputPath = "./src/main/java/testing/my-qrcode.png";
                         int qrCodeSize = 200;
