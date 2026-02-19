@@ -23,21 +23,26 @@ public class QRGenerator {
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
         hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
 
-        // Generate the QR code matrix
-        BitMatrix matrix = new MultiFormatWriter().encode(
-            qrData, 
-            BarcodeFormat.QR_CODE, 
-            size, 
-            size, 
-            hints
+        try {
+            BitMatrix matrix = new MultiFormatWriter().encode(
+                qrData, 
+                BarcodeFormat.QR_CODE, 
+                size, 
+                size, 
+                hints
         );
 
-        // Write the matrix to an image file
         MatrixToImageWriter.writeToPath(
             matrix, 
             "PNG", 
             Paths.get(filePath)
         );
+
+        System.out.println("QR Code generated successfully at " + filePath);
+
+    } catch (WriterException e) {
+        System.out.println("Error generating QR code: " + e.getMessage());
+    }
 
         System.out.println("QR Code generated successfully at " + filePath);
 

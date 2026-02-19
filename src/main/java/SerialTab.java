@@ -91,7 +91,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
             while (port.isOpen()) {
                 int length = in.read(buffer);
                 if (isDataAvailable(length) == true) {
-                    
+                    i++;
                     String hex = String.format("%02X ", buffer[i] & 0xFF);
                     String hexString = HexFormat.ofDelimiter(" ").formatHex(buffer);
                     String received = new String(buffer, 0, length);
@@ -142,8 +142,9 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                     //int endIndex = findIndex(buffer, IntroRocketData.endFlag);
                     //int length = in.read(buffer, startIndex, endIndex); 
                     int length = in.read(buffer);
+                    int i =0;
                     if (length > 0) {
-                    
+                        i++;
                         String hex = String.format("%02X ", buffer[i] & 0xFF);
                         String hexString = HexFormat.ofDelimiter(" ").formatHex(buffer);
                         String received = new String(buffer, 0, length);
@@ -175,8 +176,8 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 
                         try {
                             QRGenerator.generateQRCode(websiteLink, outputPath, qrCodeSize);
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
                         }
                     }
                 }

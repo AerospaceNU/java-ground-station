@@ -17,8 +17,6 @@ import javax.swing.border.Border;
 
 import com.fazecast.jSerialComm.SerialPort;
 
-import src.testing.GraphWindow;
-
 import javax.swing.JButton;
 
 import java.awt.event.ActionEvent;
