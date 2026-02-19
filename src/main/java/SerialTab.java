@@ -25,8 +25,11 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
     private JTabbedPane subTabbedPane = new JTabbedPane();
 	private JPanel subTab1Content = new JPanel();
 	private JPanel subTab2Content = new JPanel();
+    private JPanel subTab3Content = new JPanel();
     public final JButton submitButton = new JButton("set"); // final ?
 	public JLabel l = new JLabel("Type your prompt here. It must have two parts seperated by a space.");
+    ImageIcon icon = new ImageIcon("./src/main/java/testing/my-qrcode.png"); 
+    public JLabel image = new JLabel(icon);
 	public final JTextField console = new JTextField(16); //final?
     private int timeoutMs = 100; //milliseconds for timeout, maybe make it final?
 
@@ -41,6 +44,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
         add(subTabbedPane, BorderLayout.CENTER);
         subTabbedPane.addTab("Debug", subTab1Content);
         subTabbedPane.addTab("Config", subTab2Content);
+        subTabbedPane.addTab("QR Code", subTab3Content);
         subTabbedPane.setBackground(Color.GREEN);
 
         // Open the port
@@ -50,12 +54,20 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
         //add content to the subtabs
         //subTab1Content.setSize();
         //subTab1Content.setBackground(Color.DARK_GRAY);
+
+        ImageIcon icon = new ImageIcon("./src/main/java/testing/my-qrcode.png"); 
+        JLabel image = new JLabel(icon);
+        subTab3Content.add(image);
+
+
         subTab1Content.setLayout(new BorderLayout());
         subTab1Content.add(new JScrollPane(textArea), BorderLayout.CENTER);
+
         //subTab2Content.setBackground(Color.DARK_GRAY);
 		subTab2Content.add(console);
         subTab2Content.add(l);
     	subTab2Content.add(submitButton);
+
 
         // Start a thread to read data
         new Thread(this).start();
@@ -118,7 +130,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                     final int longitude = actualBytes[6] & 0xFF;
                     String websiteLink = GpsParser.parseAndPrint(latitude, longitude, 1);
                     String outputPath = "./src/main/java/testing/my-qrcode.png";
-                    int qrCodeSize = 400;
+                    int qrCodeSize = 200;
                     System.out.println(websiteLink);
 
                     try {
