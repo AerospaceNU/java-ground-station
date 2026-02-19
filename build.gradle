@@ -8,6 +8,9 @@ repositories {
 
 dependencies {
     implementation 'org.apache.commons:commons-csv:1.10.0'
+    implementation 'com.google.zxing:core:3.5.3'
+    implementation 'com.google.zxing:javase:3.5.3'
+
 }
 
 // Optional: set Java compatibility if needed

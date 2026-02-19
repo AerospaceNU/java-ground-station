@@ -10,7 +10,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HexFormat;
+import java.util.List;
 
 
 
@@ -83,16 +86,47 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
     @Override
     public void run() {
         try (InputStream in = port.getInputStream();) {
-            byte[] buffer = new byte[17];
+            byte[] buffer = new byte[1024];
             int i = 0;
             while (port.isOpen()) {
                 int length = in.read(buffer);
                 if (isDataAvailable(length) == true) {
                     i++;
+                    
                     String hex = String.format("%02X ", buffer[i] & 0xFF);
                     String hexString = HexFormat.ofDelimiter(" ").formatHex(buffer);
                     String received = new String(buffer, 0, length);
-                    SwingUtilities.invokeLater(() -> textArea.append(hexString));
+                    //SwingUtilities.invokeLater(() -> textArea.append(hexString));
+
+                    // String[] parts = hexString.split(" ");
+                    // List<Integer> parsedIntList = new ArrayList<>();
+                    // for (int j = 0; j < length; j++) {
+                    //     parsedIntList.add(Integer.parseInt(parts[j], 16)); //check if parts[j] is a str or a int?
+                    // }
+
+                    byte[] actualBytes = Arrays.copyOf(buffer, length);
+
+                    long value = 0;
+
+                    for (int j = 0; j < actualBytes.length; j++) {
+                        value = (value << 8) | (actualBytes[j] & 0xFF);
+                    }
+
+                    String parsedInt = Long.toString(value); //hex translator
+                    SwingUtilities.invokeLater(() -> textArea.append(parsedInt + "\n"));
+
+                    final int latitude = actualBytes[2] & 0xFF;
+                    final int longitude = actualBytes[6] & 0xFF;
+                    String websiteLink = GpsParser.parseAndPrint(latitude, longitude, 1);
+                    String outputPath = "./src/testing/my-qrcode.png";
+                    int qrCodeSize = 400;
+                    System.out.println(websiteLink);
+
+                    try {
+                        QRGenerator.generateQRCode(websiteLink, outputPath, qrCodeSize);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     /*String sent = new String(datatosend);
                     SwingUtilities.invokeLater(() -> textArea.append(sent));*/
                 }
@@ -101,7 +135,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
             //add another try and catch here...and simplify the existing code...
             System.err.println("Error during serial communication: " + e.getMessage() + " Let's try again!");
             try (InputStream in = port.getInputStream();){
-                byte[] buffer = new byte[17];
+                byte[] buffer = new byte[1024];
                 // no isDataAvailable(length) in this catch block
                 while(port.isOpen()) {
                     //IntroRocketData rocketData; 
@@ -110,9 +144,17 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                     //int length = in.read(buffer, startIndex, endIndex); 
                     int length = in.read(buffer);
                     if (length > 0) {
-                        String hexString = HexFormat.ofDelimiter(" ").formatHex(buffer);
-                        String recieved = new String(buffer, 0, length, StandardCharsets.ISO_8859_1);
-                        SwingUtilities.invokeLater(() -> textArea.append(hexString));
+
+                        byte[] actualBytes = Arrays.copyOf(buffer, length);
+
+                        long value = 0;
+
+                        for (int j = 0; j < actualBytes.length; j++) {
+                            value = (value << 8) | (actualBytes[j] & 0xFF);
+                        }
+
+                        String parsedInt = Long.toString(value); //hex translator
+                        SwingUtilities.invokeLater(() -> textArea.append(parsedInt + "\n"));
                         //System.out.println(length);
                     }
                 }
