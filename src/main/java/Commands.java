@@ -1,4 +1,4 @@
-package src;
+
 
 public class Commands {
     private String str;

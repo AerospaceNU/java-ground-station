@@ -1,4 +1,4 @@
-package src;
+
 import com.fazecast.jSerialComm.SerialPort;
 
 public class ConfigPage {

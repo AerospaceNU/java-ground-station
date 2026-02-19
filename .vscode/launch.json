@@ -8,6 +8,13 @@
             "type": "java",
             "name": "main",
             "request": "launch",
+            "mainClass": "main",
+            "projectName": "java-ground-station"
+        },
+        {
+            "type": "java",
+            "name": "main",
+            "request": "launch",
             "mainClass": "src.main",
             "projectName": "java-ground-station_6b43f74c"
         },

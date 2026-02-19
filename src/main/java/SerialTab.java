@@ -1,4 +1,4 @@
-package src;
+
 
 import com.fazecast.jSerialComm.SerialPort;
 import javax.swing.*;
@@ -91,7 +91,6 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
             while (port.isOpen()) {
                 int length = in.read(buffer);
                 if (isDataAvailable(length) == true) {
-                    i++;
                     
                     String hex = String.format("%02X ", buffer[i] & 0xFF);
                     String hexString = HexFormat.ofDelimiter(" ").formatHex(buffer);
@@ -118,7 +117,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                     final int latitude = actualBytes[2] & 0xFF;
                     final int longitude = actualBytes[6] & 0xFF;
                     String websiteLink = GpsParser.parseAndPrint(latitude, longitude, 1);
-                    String outputPath = "./src/testing/my-qrcode.png";
+                    String outputPath = "./src/main/java/testing/my-qrcode.png";
                     int qrCodeSize = 400;
                     System.out.println(websiteLink);
 
@@ -144,6 +143,17 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                     //int length = in.read(buffer, startIndex, endIndex); 
                     int length = in.read(buffer);
                     if (length > 0) {
+                    
+                        String hex = String.format("%02X ", buffer[i] & 0xFF);
+                        String hexString = HexFormat.ofDelimiter(" ").formatHex(buffer);
+                        String received = new String(buffer, 0, length);
+                        //SwingUtilities.invokeLater(() -> textArea.append(hexString));
+
+                        // String[] parts = hexString.split(" ");
+                        // List<Integer> parsedIntList = new ArrayList<>();
+                        // for (int j = 0; j < length; j++) {
+                        //     parsedIntList.add(Integer.parseInt(parts[j], 16)); //check if parts[j] is a str or a int?
+                        // }
 
                         byte[] actualBytes = Arrays.copyOf(buffer, length);
 
@@ -155,7 +165,19 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 
                         String parsedInt = Long.toString(value); //hex translator
                         SwingUtilities.invokeLater(() -> textArea.append(parsedInt + "\n"));
-                        //System.out.println(length);
+
+                        final int latitude = actualBytes[2] & 0xFF;
+                        final int longitude = actualBytes[6] & 0xFF;
+                        String websiteLink = GpsParser.parseAndPrint(latitude, longitude, 1);
+                        String outputPath = "./src/main/java/testing/my-qrcode.png";
+                        int qrCodeSize = 400;
+                        System.out.println(websiteLink);
+
+                        try {
+                            QRGenerator.generateQRCode(websiteLink, outputPath, qrCodeSize);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             
