@@ -5,28 +5,23 @@ import java.nio.ByteOrder;
 
 public class GpsParser {
 
-    private static final int DIV = 10_000_000; // 1e7 — change if yours differs
-
     // Mirrors your C struct layout — adjust field order/sizes to match yours
-    // Assumes: int32 latitude, int32 longitude, uint8 satellites
 
+    private static final int DIV = 10_000_000;
     private static final int PACKET_SIZE = 17;
 
-    public static void parseSerial(InputStream in) throws Exception {
+    public static String parseSerial(InputStream in) throws Exception {
         byte[] buffer = new byte[PACKET_SIZE];
-        int packetNum = 0;
+        int bytesRead = in.readNBytes(buffer, 0, PACKET_SIZE);
+        if (bytesRead < PACKET_SIZE) return null;
 
-        while (true) {
-            int bytesRead = in.readNBytes(buffer, 0, PACKET_SIZE);
-            if (bytesRead < PACKET_SIZE) break;
-            ByteBuffer bb = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer bb = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN);
 
-            int rawLat = bb.getInt();       // msg->latitude
-            int rawLon = bb.getInt();       // msg->longitude
-            int satellites = bb.get() & 0xFF; // msg->satellites (unsigned byte)
+        int rawLat = bb.getInt();       // msg->latitude
+        int rawLon = bb.getInt();       // msg->longitude
+        int satellites = bb.getInt(); // msg->satellites
 
-            parseAndPrint(rawLat, rawLon, satellites);
-        }
+        return parseAndPrint(rawLat, rawLon, satellites);
     }
 
     public static String parseAndPrint(int rawLat, int rawLon, int satellites) {

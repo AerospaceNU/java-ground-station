@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -126,26 +127,24 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                     String parsedInt = Long.toString(value); //hex translator
                     SwingUtilities.invokeLater(() -> textArea.append(parsedInt + "\n"));
 
-                    int latitude =  ((actualBytes[5] & 0xFF) << 24) |
-                                    ((actualBytes[4] & 0xFF) << 16) |
-                                    ((actualBytes[3] & 0xFF) << 8)  |
-                                     (actualBytes[2] & 0xFF);
-
-                    int longitude = ((actualBytes[9] & 0xFF) << 24) |
-                                    ((actualBytes[8] & 0xFF) << 16) |
-                                    ((actualBytes[7] & 0xFF) << 8)  |
-                                     (actualBytes[6] & 0xFF);
-                                         
-                    String websiteLink = GpsParser.parseAndPrint(latitude, longitude, 1);
-                    String outputPath = "./src/main/java/testing/my-qrcode.png";
-                    int qrCodeSize = 200;
-                    System.out.println(websiteLink);
-
-                    try {
-                        QRGenerator.generateQRCode(websiteLink, outputPath, qrCodeSize);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    try (ByteArrayInputStream bais = new ByteArrayInputStream(actualBytes))
+                        {
+                            bais.skip(2);
+                            String websiteLink = GpsParser.parseSerial(bais);
+                            if(websiteLink != null)
+                            {
+                                String outputPath = "./src/main/java/testing/my-qrcode.png";
+                                int qrCodeSize = 200;
+                                System.out.println(websiteLink);
+                                try {
+                                    QRGenerator.generateQRCode(websiteLink, outputPath, qrCodeSize);
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                }
+                            }
+                        } catch(Exception e2){
+                            System.err.println("Error parsing GPS data: " + e2.getMessage());
+                        }
                     /*String sent = new String(datatosend);
                     SwingUtilities.invokeLater(() -> textArea.append(sent));*/
                 }
@@ -186,26 +185,23 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 
                         String parsedInt = Long.toString(value); //hex translator
                         SwingUtilities.invokeLater(() -> textArea.append(parsedInt + "\n"));
-
-                        int latitude = ((actualBytes[5] & 0xFF) << 24) |
-                                       ((actualBytes[4] & 0xFF) << 16) |
-                                       ((actualBytes[3] & 0xFF) << 8)  |
-                                        (actualBytes[2] & 0xFF);
-
-                        int longitude = ((actualBytes[9] & 0xFF) << 24) |
-                                        ((actualBytes[8] & 0xFF) << 16) |
-                                        ((actualBytes[7] & 0xFF) << 8)  |
-                                         (actualBytes[6] & 0xFF);
-
-                        String websiteLink = GpsParser.parseAndPrint(latitude, longitude, 1);
-                        String outputPath = "./src/main/java/testing/my-qrcode.png";
-                        int qrCodeSize = 200;
-                        System.out.println(websiteLink);
-
-                        try {
-                            QRGenerator.generateQRCode(websiteLink, outputPath, qrCodeSize);
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
+                        try (ByteArrayInputStream bais = new ByteArrayInputStream(actualBytes))
+                        {
+                            bais.skip(2);
+                            String websiteLink = GpsParser.parseSerial(bais);
+                            if(websiteLink != null)
+                            {
+                                String outputPath = "./src/main/java/testing/my-qrcode.png";
+                                int qrCodeSize = 200;
+                                System.out.println(websiteLink);
+                                try {
+                                    QRGenerator.generateQRCode(websiteLink, outputPath, qrCodeSize);
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                }
+                            }
+                        } catch(Exception e3){
+                            System.err.println("Error parsing GPS data: " + e3.getMessage());
                         }
                     }
                 }
