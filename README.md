@@ -6,7 +6,9 @@ Placeholder README file.
 How to run:
 If you are a Windows or macOS system which features JRE, you can run the JAR file by double clicking. No additional Java software should be required.
 
-You can also go into the command line and run this command to use the JAR file
+Java 17+ reccomended. 
+
+You can also go into the command line and run this command to use the JAR file. 
 
 "java -jar java-ground-station.jar"
 
@@ -21,3 +23,5 @@ Once a "sender" and "reciever" device are connected via serial connection, you c
 The reciever should recieve a continuous stream of information, while the sender is the one that is sending the information to the receiver and it won't be really getting too much data itself. 
 
 You can also check the "QR Code" tab in each of the USB device's sections to see a QR code to a Google Maps link of the exact lat and long of the USB device.
+
+If the program doesn't work, try re-running it by closing and starting it up again.
