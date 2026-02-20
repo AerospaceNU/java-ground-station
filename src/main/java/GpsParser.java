@@ -17,19 +17,25 @@ public class GpsParser {
 
         ByteBuffer bb = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN);
 
+        int startFlag = bb.get();
+        int type = bb.get();
+        int length = bb.get();
         int rawLat = bb.getInt();       // msg->latitude
         int rawLon = bb.getInt();       // msg->longitude
         int satellites = bb.getInt(); // msg->satellites
+        int crc = bb.get();
+        int endFlag = bb.get();
+
 
         return parseAndPrint(rawLat, rawLon, satellites);
     }
 
     public static String parseAndPrint(int rawLat, int rawLon, int satellites) {
         // Replicate the C math
-        int lat  = rawLat / DIV;
-        int latd = Math.abs(rawLat) % DIV;
-        int lon  = rawLon / DIV;
-        int lond = Math.abs(rawLon) % DIV;
+        int lat  = (rawLat / DIV);
+        int latd = (Math.abs(rawLat) % DIV);
+        int lon  = (rawLon / DIV);
+        int lond = (Math.abs(rawLon) % DIV) ;
 
         // Match your Serial.printf output
         System.out.printf(
@@ -48,6 +54,7 @@ public class GpsParser {
         double latDouble = rawLat / (double) DIV;
         double lonDouble = rawLon / (double) DIV;
         System.out.printf("Parsed coords: %.7f, %.7f%n", latDouble, lonDouble);
+        System.out.println(rawLat);
         return url;
     }
 }

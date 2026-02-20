@@ -129,7 +129,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 
                     try (ByteArrayInputStream bais = new ByteArrayInputStream(actualBytes))
                         {
-                            bais.skip(2);
+                            //bais.skip(3);
                             String websiteLink = GpsParser.parseSerial(bais);
                             if(websiteLink != null)
                             {
@@ -187,7 +187,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                         SwingUtilities.invokeLater(() -> textArea.append(parsedInt + "\n"));
                         try (ByteArrayInputStream bais = new ByteArrayInputStream(actualBytes))
                         {
-                            bais.skip(2);
+                            //bais.skip(3);
                             String websiteLink = GpsParser.parseSerial(bais);
                             if(websiteLink != null)
                             {

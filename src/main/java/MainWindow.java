@@ -64,7 +64,7 @@ public class MainWindow {
 	private void checkForNewPorts() {
 		for (SerialPort port : SerialPort.getCommPorts()) {
             String portName = port.getSystemPortName();
-			if (!activeTabs.containsKey(portName) && portName.contains("cu.usbmodem")) {
+			if (!activeTabs.containsKey(portName) && (portName.contains("cu.usbmodem") || portName.contains("COM"))) {
 				System.out.println("New serial device detected: " + portName);
 				//create the serial tab which will be used for active tabs
 				SerialTab tab = new SerialTab(port);
