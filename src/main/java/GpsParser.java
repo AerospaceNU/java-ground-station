@@ -9,22 +9,41 @@ public class GpsParser {
 
     private static final int DIV = 10_000_000;
     private static final int PACKET_SIZE = 17;
+    private static final int START_FLAG = 0xB5;
+    private static final int END_FLAG = 0x62;
 
     public static String parseSerial(InputStream in) throws Exception {
-        byte[] buffer = new byte[PACKET_SIZE];
-        int bytesRead = in.readNBytes(buffer, 0, PACKET_SIZE);
-        if (bytesRead < PACKET_SIZE) return null;
+        int firstByte;
+        do {
+            firstByte = in.read();
+            if (firstByte < 0) {
+                return null;
+            }
+        } while (firstByte != START_FLAG);
 
-        ByteBuffer bb = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN);
+        byte[] packet = new byte[PACKET_SIZE];
+        packet[0] = (byte) firstByte;
 
-        int startFlag = bb.get();
-        int type = bb.get();
-        int length = bb.get();
+        byte[] remainingBytes = in.readNBytes(PACKET_SIZE - 1);
+        if (remainingBytes.length < (PACKET_SIZE - 1)) {
+            return null;
+        }
+        System.arraycopy(remainingBytes, 0, packet, 1, PACKET_SIZE - 1);
+
+        ByteBuffer bb = ByteBuffer.wrap(packet).order(ByteOrder.LITTLE_ENDIAN);
+
+        int startFlag = Byte.toUnsignedInt(bb.get());
+        int type = Byte.toUnsignedInt(bb.get());
+        int length = Byte.toUnsignedInt(bb.get());
         int rawLat = bb.getInt();       // msg->latitude
         int rawLon = bb.getInt();       // msg->longitude
         int satellites = bb.getInt(); // msg->satellites
-        int crc = bb.get();
-        int endFlag = bb.get();
+        int crc = Byte.toUnsignedInt(bb.get());
+        int endFlag = Byte.toUnsignedInt(bb.get());
+
+        if (startFlag != START_FLAG || endFlag != END_FLAG) {
+            return null;
+        }
 
 
         return parseAndPrint(rawLat, rawLon, satellites);
@@ -38,23 +57,23 @@ public class GpsParser {
         int lond = (Math.abs(rawLon) % DIV) ;
 
         // Match your Serial.printf output
-        System.out.printf(
-            "(latitude %d.%07d) (longitude %d.%07d) (satellites %d)%n",
-            lat, latd, lon, lond, satellites
-        );
+        // System.out.printf(
+        //     "(latitude %d.%07d) (longitude %d.%07d) (satellites %d)%n",
+        //     lat, latd, lon, lond, satellites
+        // );
 
         // Google Maps URL
         String url = String.format(
             "https://maps.google.com/maps?z=12&t=m&q=loc:%d.%07d+%d.%07d",
             lat, latd, lon, lond
         );
-        System.out.println(url);
+        // System.out.println(url);
 
         // Optional: build as a proper double for other uses
         double latDouble = rawLat / (double) DIV;
         double lonDouble = rawLon / (double) DIV;
-        System.out.printf("Parsed coords: %.7f, %.7f%n", latDouble, lonDouble);
-        System.out.println(rawLat);
+        // System.out.printf("Parsed coords: %.7f, %.7f%n", latDouble, lonDouble);
+        // System.out.println(rawLat);
         return url;
     }
 }

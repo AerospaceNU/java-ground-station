@@ -1,5 +1,15 @@
+# IntelliJ
 .idea/*
 !.idea/codeStyles/
+
+# Gradle
+.gradle/
+build/
+
+# Generate class files
+*.class
+
+# qr code / others
+my-qrcode.png
 out/
 java-ground-station.iml
-.gradle/

@@ -6,15 +6,13 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
-import java.io.ByteArrayInputStream;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import javax.imageio.ImageIO;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HexFormat;
-import java.util.List;
 
 
 
@@ -27,10 +25,13 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 	private JPanel subTab1Content = new JPanel();
 	private JPanel subTab2Content = new JPanel();
     private JPanel subTab3Content = new JPanel();
+    private static final long QR_UPDATE_INTERVAL_MS = 1000;
+    private static final String QR_OUTPUT_PATH = "./src/main/java/testing/my-qrcode.png";
+    private static final int QR_CODE_SIZE = 200;
+    private long lastQrUpdateTimeMs = 0;
     public final JButton submitButton = new JButton("set"); // final ?
 	public JLabel l = new JLabel("Type your prompt here. It must have two parts seperated by a space.");
-    ImageIcon icon = new ImageIcon("./src/main/java/testing/my-qrcode.png"); 
-    public JLabel image = new JLabel(icon);
+	private final JLabel image = new JLabel(new ImageIcon(QR_OUTPUT_PATH));
 	public final JTextField console = new JTextField(16); //final?
     private int timeoutMs = 0; //milliseconds for timeout, maybe make it final?
 
@@ -56,8 +57,6 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
         //subTab1Content.setSize();
         //subTab1Content.setBackground(Color.DARK_GRAY);
 
-        ImageIcon icon = new ImageIcon("./src/main/java/testing/my-qrcode.png"); 
-        JLabel image = new JLabel(icon);
         subTab3Content.add(image);
 
 
@@ -98,119 +97,37 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 
     @Override
     public void run() {
-        try (InputStream in = port.getInputStream();) {
-            byte[] buffer = new byte[1024];
-            int i = 0;
+        try (InputStream in = port.getInputStream()) {
             while (port.isOpen()) {
-                int length = in.read(buffer);
-                if (isDataAvailable(length) == true) {
-                    i++;
-                    String hex = String.format("%02X ", buffer[i] & 0xFF);
-                    String hexString = HexFormat.ofDelimiter(" ").formatHex(buffer);
-                    String received = new String(buffer, 0, length);
-                    //SwingUtilities.invokeLater(() -> textArea.append(received));
-
-                    // String[] parts = hexString.split(" ");
-                    // List<Integer> parsedIntList = new ArrayList<>();
-                    // for (int j = 0; j < length; j++) {
-                    //     parsedIntList.add(Integer.parseInt(parts[j], 16)); //check if parts[j] is a str or a int?
-                    // }
-
-                    byte[] actualBytes = Arrays.copyOf(buffer, length);
-
-                    long value = 0;
-
-                    for (int j = 0; j < actualBytes.length; j++) {
-                        value = (value << 8) | (actualBytes[j] & 0xFF);
-                    }
-
-                    String parsedInt = Long.toString(value); //hex translator
-                    SwingUtilities.invokeLater(() -> textArea.append(parsedInt + "\n"));
-
-                    try (ByteArrayInputStream bais = new ByteArrayInputStream(actualBytes))
-                        {
-                            //bais.skip(3);
-                            String websiteLink = GpsParser.parseSerial(bais);
-                            if(websiteLink != null)
-                            {
-                                String outputPath = "./src/main/java/testing/my-qrcode.png";
-                                int qrCodeSize = 200;
-                                System.out.println(websiteLink);
-                                try {
-                                    QRGenerator.generateQRCode(websiteLink, outputPath, qrCodeSize);
-                                } catch (IOException e1) {
-                                    e1.printStackTrace();
-                                }
-                            }
-                        } catch(Exception e2){
-                            System.err.println("Error parsing GPS data: " + e2.getMessage());
+                try {
+                    String websiteLink = GpsParser.parseSerial(in);
+                    if (websiteLink != null) {
+                        String sanitizedLink = websiteLink.replaceAll("\\s+", "");
+                        System.out.println(websiteLink);
+                        SwingUtilities.invokeLater(() -> textArea.append(sanitizedLink + "\n"));
+                        long nowMs = System.currentTimeMillis();
+                        if ((nowMs - lastQrUpdateTimeMs) >= QR_UPDATE_INTERVAL_MS) {
+                            BufferedImage qrImage = QRGenerator.generateQRCodeImage(sanitizedLink, QR_CODE_SIZE);
+                            ImageIO.write(qrImage, "PNG", new File(QR_OUTPUT_PATH));
+                            refreshQrImage(qrImage);
+                            lastQrUpdateTimeMs = nowMs;
                         }
-                    /*String sent = new String(datatosend);
-                    SwingUtilities.invokeLater(() -> textArea.append(sent));*/
+                    }
+                } catch (Exception parseError) {
+                    System.err.println("Error parsing GPS data: " + parseError.getMessage());
                 }
             }
         } catch (Exception e) {
-            //add another try and catch here...and simplify the existing code...
-            System.err.println("Error during serial communication: " + e.getMessage() + " Let's try again!");
-            try (InputStream in = port.getInputStream();){
-                byte[] buffer = new byte[1024];
-                // no isDataAvailable(length) in this catch block
-                while(port.isOpen()) {
-                    //IntroRocketData rocketData; 
-                    //int startIndex = findIndex(buffer, IntroRocketData.startFlag);
-                    //int endIndex = findIndex(buffer, IntroRocketData.endFlag);
-                    //int length = in.read(buffer, startIndex, endIndex); 
-                    int length = in.read(buffer);
-                    int i =0;
-                    if (length > 0) {
-                        i++;
-                        String hex = String.format("%02X ", buffer[i] & 0xFF);
-                        String hexString = HexFormat.ofDelimiter(" ").formatHex(buffer);
-                        String received = new String(buffer, 0, length);
-                        //SwingUtilities.invokeLater(() -> textArea.append(received));
-
-                        // String[] parts = hexString.split(" ");
-                        // List<Integer> parsedIntList = new ArrayList<>();
-                        // for (int j = 0; j < length; j++) {
-                        //     parsedIntList.add(Integer.parseInt(parts[j], 16)); //check if parts[j] is a str or a int?
-                        // }
-
-                        byte[] actualBytes = Arrays.copyOf(buffer, length);
-
-                        long value = 0;
-
-                        for (int j = 0; j < actualBytes.length; j++) {
-                            value = (value << 8) | (actualBytes[j] & 0xFF);
-                        }
-
-                        String parsedInt = Long.toString(value); //hex translator
-                        SwingUtilities.invokeLater(() -> textArea.append(parsedInt + "\n"));
-                        try (ByteArrayInputStream bais = new ByteArrayInputStream(actualBytes))
-                        {
-                            //bais.skip(3);
-                            String websiteLink = GpsParser.parseSerial(bais);
-                            if(websiteLink != null)
-                            {
-                                String outputPath = "./src/main/java/testing/my-qrcode.png";
-                                int qrCodeSize = 200;
-                                System.out.println(websiteLink);
-                                try {
-                                    QRGenerator.generateQRCode(websiteLink, outputPath, qrCodeSize);
-                                } catch (IOException e1) {
-                                    e1.printStackTrace();
-                                }
-                            }
-                        } catch(Exception e3){
-                            System.err.println("Error parsing GPS data: " + e3.getMessage());
-                        }
-                    }
-                }
-            
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            System.err.println("Error during serial communication: " + e.getMessage());
         }
-        }
+    }
+
+    private void refreshQrImage(BufferedImage updatedImage) {
+        SwingUtilities.invokeLater(() -> {
+            image.setIcon(new ImageIcon(updatedImage));
+            image.revalidate();
+            image.repaint();
+        });
     }
 
     @Override
