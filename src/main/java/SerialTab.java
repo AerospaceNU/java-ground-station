@@ -1,12 +1,15 @@
 
 
 import com.fazecast.jSerialComm.SerialPort;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,6 +18,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.List;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+
 
 
 
@@ -101,6 +107,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
         try (InputStream in = port.getInputStream();) {
             byte[] buffer = new byte[1024];
             int i = 0;
+            int k = 0;
             while (port.isOpen()) {
                 int length = in.read(buffer);
                 if (isDataAvailable(length) == true) {
@@ -135,9 +142,21 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                             {
                                 String outputPath = "./src/main/java/testing/my-qrcode.png";
                                 int qrCodeSize = 200;
-                                System.out.println(websiteLink);
+                                //System.out.println(websiteLink);
                                 try {
+                                    System.out.println(websiteLink);
                                     QRGenerator.generateQRCode(websiteLink, outputPath, qrCodeSize);
+                                    icon = new ImageIcon("./src/main/java/testing/my-qrcode.png");
+                                    image = new JLabel(icon);
+
+                                    BufferedImage qrImage = ImageIO.read(new File(outputPath));
+
+                                    SwingUtilities.invokeLater(() -> {
+                                        image.setIcon(new ImageIcon(qrImage));
+                                        image.revalidate();
+                                        image.repaint();
+                                    });
+                                    
                                 } catch (IOException e1) {
                                     e1.printStackTrace();
                                 }
@@ -193,9 +212,18 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                             {
                                 String outputPath = "./src/main/java/testing/my-qrcode.png";
                                 int qrCodeSize = 200;
-                                System.out.println(websiteLink);
                                 try {
+                                    System.out.println(websiteLink);
                                     QRGenerator.generateQRCode(websiteLink, outputPath, qrCodeSize);
+                                    icon = new ImageIcon("./src/main/java/testing/my-qrcode.png");
+
+                                    BufferedImage qrImage = ImageIO.read(new File(outputPath));
+
+                                    SwingUtilities.invokeLater(() -> {
+                                        image.setIcon(new ImageIcon(qrImage));
+                                        image.revalidate();
+                                        image.repaint();
+                                    });
                                 } catch (IOException e1) {
                                     e1.printStackTrace();
                                 }
