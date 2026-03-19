@@ -19,23 +19,20 @@ import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.List;
 import java.awt.image.BufferedImage;
-import javax.imageio.ImageIO;
 
 public class SerialTab extends JPanel implements Runnable, java.awt.event.ActionListener{
     private final SerialPort port;
     private final JTextArea textArea = new JTextArea();
     private JTabbedPane subTabbedPane = new JTabbedPane();
-	private JPanel subTab1Content = new JPanel();
-	private JPanel subTab2Content = new JPanel();
+    private JPanel subTab1Content = new JPanel();
+    private JPanel subTab2Content = new JPanel();
     private JPanel subTab3Content = new JPanel();
     public final JButton submitButton = new JButton("set"); // final ?
-	public JLabel l = new JLabel("Type your prompt here. It must have two parts seperated by a space.");
-    ImageIcon icon = new ImageIcon("./src/main/java/testing/my-qrcode.png"); 
-    public JLabel image = new JLabel(icon);
-	public final JTextField console = new JTextField(16); //final?
-    private int timeoutMs = 0; //milliseconds for timeout, maybe make it final?
-
-    //OutputStream outputStream = port.getOutputStream();
+    public JLabel l = new JLabel("Type your prompt here. It must have two parts seperated by a space.");
+    ImageIcon icon = new ImageIcon("./src/main/java/testing/my-qrcode.png");
+    public JLabel image = new JLabel(icon); // image is updated in run() to refresh the QR code display
+    public final JTextField console = new JTextField(16); // final?
+    private int timeoutMs = 0; // milliseconds for read timeout; 0 = wait indefinitely (semi-blocking)
 
     public SerialTab(SerialPort port) {
         this.port = port;
@@ -49,7 +46,7 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
         subTabbedPane.addTab("QR Code", subTab3Content);
         subTabbedPane.setBackground(Color.GREEN);
 
-        // Open the port
+        // Open the port and configure its read timeout
         port.openPort();
         port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, timeoutMs, 0);
 
@@ -57,45 +54,43 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
         //subTab1Content.setSize();
         //subTab1Content.setBackground(Color.DARK_GRAY);
 
-        //What the debug page will display and show
+        // Debug tab: scrollable raw output area
         subTab1Content.setLayout(new BorderLayout());
         subTab1Content.add(new JScrollPane(textArea), BorderLayout.CENTER);
 
-        //What the console page will display and show
+        // Config tab: text field + label + submit button for sending commands
         //subTab2Content.setBackground(Color.DARK_GRAY);
-		subTab2Content.add(console);
+        subTab2Content.add(console);
         subTab2Content.add(l);
-    	subTab2Content.add(submitButton);
+        subTab2Content.add(submitButton);
 
-        //What the QR code page will display and show
-        ImageIcon icon = new ImageIcon("./src/main/java/testing/my-qrcode.png"); 
+        // QR Code tab: displays the QR code image (updated dynamically in run())
+        // Note: these local `icon` and `image` shadow the instance fields above.
+        // The instance fields are what get updated in run(); these locals only populate the initial tab UI.
+        ImageIcon icon = new ImageIcon("./src/main/java/testing/my-qrcode.png");
         JLabel image = new JLabel(icon);
         subTab3Content.add(image);
 
-        // Start a thread to read data
+        // Start a background thread to continuously read from the serial port
         new Thread(this).start();
     }
 
-    // should check if data is available to read from the serial input (not working?)
+    // Returns true if bytes were read (len > 0), false otherwise
     private Boolean isDataAvailable(int len) {
-			if (len <= 0){
-                return false;
-            }
-            else{
-                return true;
-            }
-	}
+        return len > 0;
+    }
 
+    // Searches a byte array for a target byte value; returns its index or -1 if not found
     public static int findIndex(byte[] arr, int target) {
         if (arr == null) {
             return -1;
         }
         for (int i = 0; i < arr.length; i++) {
             if (arr[i] == target) {
-                return i; // Return the index of the byte[], startFlag
+                return i; // found the target byte (e.g. a start/end flag)
             }
         }
-        return -1; // Return -1 if the element is not found
+        return -1;
     }
 
     @Override
@@ -103,87 +98,89 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
         try (InputStream in = port.getInputStream();) {
             byte[] buffer = new byte[1024];
             int i = 0;
-            int k = 0;
+            int k = 0; // unused counter — reserved for future use
             while (port.isOpen()) {
                 int length = in.read(buffer);
                 if (isDataAvailable(length) == true) {
                     i++;
+                    // `hex` and `hexString` kept for debugging convenience; not currently displayed
                     String hex = String.format("%02X ", buffer[i] & 0xFF);
                     String hexString = HexFormat.ofDelimiter(" ").formatHex(buffer);
-                    String received = new String(buffer, 0, length);
+                    String received = new String(buffer, 0, length); // raw string form, not currently displayed
+
                     //SwingUtilities.invokeLater(() -> textArea.append(received));
 
+                    // Commented-out alternative: parse each byte as a hex int
                     // String[] parts = hexString.split(" ");
                     // List<Integer> parsedIntList = new ArrayList<>();
                     // for (int j = 0; j < length; j++) {
                     //     parsedIntList.add(Integer.parseInt(parts[j], 16)); //check if parts[j] is a str or a int?
                     // }
 
+                    // Trim buffer to the actual number of bytes read
                     byte[] actualBytes = Arrays.copyOf(buffer, length);
 
+                    // Combine all bytes into a single long value (big-endian)
                     long value = 0;
-
                     for (int j = 0; j < actualBytes.length; j++) {
                         value = (value << 8) | (actualBytes[j] & 0xFF);
                     }
 
-                    String parsedInt = Long.toString(value); //hex translator
+                    String parsedInt = Long.toString(value); // numeric representation of received bytes
                     SwingUtilities.invokeLater(() -> textArea.append(parsedInt + "\n"));
 
-                    try (ByteArrayInputStream bais = new ByteArrayInputStream(actualBytes))
-                        {
-                            //bais.skip(3);
-                            String websiteLink = GpsParser.parseSerial(bais);
-                            if(websiteLink != null)
-                            {
-                                String outputPath = "./src/main/java/testing/my-qrcode.png";
-                                int qrCodeSize = 200;
-                                //System.out.println(websiteLink);
-                                try {
-                                    System.out.println(websiteLink);
-                                    QRGenerator.generateQRCode(websiteLink, outputPath, qrCodeSize);
-                                    icon = new ImageIcon("./src/main/java/testing/my-qrcode.png");
-                                    image = new JLabel(icon);
+                    // Parse the bytes as a GPS packet and generate a QR code if a valid link is returned
+                    try (ByteArrayInputStream bais = new ByteArrayInputStream(actualBytes)) {
+                        String websiteLink = GpsParser.parseSerial(bais);
+                        if (websiteLink != null) {
+                            String outputPath = "./src/main/java/testing/my-qrcode.png";
+                            int qrCodeSize = 200;
+                            try {
+                                System.out.println(websiteLink);
+                                QRGenerator.generateQRCode(websiteLink, outputPath, qrCodeSize);
 
-                                    BufferedImage qrImage = ImageIO.read(new File(outputPath));
+                                // Reload the QR image from disk and update the label
+                                icon = new ImageIcon("./src/main/java/testing/my-qrcode.png");
+                                image = new JLabel(icon);
 
-                                    SwingUtilities.invokeLater(() -> {
-                                        image.setIcon(new ImageIcon(qrImage));
-                                        image.revalidate();
-                                        image.repaint();
-                                    });
-                                    
-                                } catch (IOException e1) {
-                                    e1.printStackTrace();
-                                }
+                                BufferedImage qrImage = ImageIO.read(new File(outputPath));
+                                SwingUtilities.invokeLater(() -> {
+                                    image.setIcon(new ImageIcon(qrImage));
+                                    image.revalidate();
+                                    image.repaint();
+                                });
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
                             }
-                        } catch(Exception e2){
-                            System.err.println("Error parsing GPS data: " + e2.getMessage());
                         }
+                    } catch (Exception e2) {
+                        System.err.println("Error parsing GPS data: " + e2.getMessage());
+                    }
                     /*String sent = new String(datatosend);
                     SwingUtilities.invokeLater(() -> textArea.append(sent));*/
                 }
             }
         } catch (Exception e) {
-            //add another try and catch here...and simplify the existing code...
+            // If the primary read loop throws, retry with a simplified loop (no isDataAvailable check)
             System.err.println("Error during serial communication: " + e.getMessage() + " Let's try again!");
-            try (InputStream in = port.getInputStream();){
+            try (InputStream in = port.getInputStream();) {
                 byte[] buffer = new byte[1024];
-                // no isDataAvailable(length) in this catch block
-                while(port.isOpen()) {
-                    //IntroRocketData rocketData; 
+                while (port.isOpen()) {
+                    //IntroRocketData rocketData;
                     //int startIndex = findIndex(buffer, IntroRocketData.startFlag);
                     //int endIndex = findIndex(buffer, IntroRocketData.endFlag);
-                    //int length = in.read(buffer, startIndex, endIndex); 
+                    //int length = in.read(buffer, startIndex, endIndex);
                     int length = in.read(buffer);
-                    int i =0;
+                    int i = 0;
                     if (length > 0) {
                         i++;
+                        // `hex`, `hexString`, `received` retained for debugging; not currently displayed
                         String hex = String.format("%02X ", buffer[i] & 0xFF);
                         String hexString = HexFormat.ofDelimiter(" ").formatHex(buffer);
                         String received = new String(buffer, 0, length);
                         //SwingUtilities.invokeLater(() -> textArea.append(received));
 
+                        // Commented-out alternative hex parse approach
                         // String[] parts = hexString.split(" ");
                         // List<Integer> parsedIntList = new ArrayList<>();
                         // for (int j = 0; j < length; j++) {
@@ -192,20 +189,19 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
 
                         byte[] actualBytes = Arrays.copyOf(buffer, length);
 
+                        // Combine bytes into a single big-endian long
                         long value = 0;
-
                         for (int j = 0; j < actualBytes.length; j++) {
                             value = (value << 8) | (actualBytes[j] & 0xFF);
                         }
 
-                        String parsedInt = Long.toString(value); //hex translator
+                        String parsedInt = Long.toString(value);
                         SwingUtilities.invokeLater(() -> textArea.append(parsedInt + "\n"));
-                        try (ByteArrayInputStream bais = new ByteArrayInputStream(actualBytes))
-                        {
+
+                        try (ByteArrayInputStream bais = new ByteArrayInputStream(actualBytes)) {
                             //bais.skip(3);
                             String websiteLink = GpsParser.parseSerial(bais);
-                            if(websiteLink != null)
-                            {
+                            if (websiteLink != null) {
                                 String outputPath = "./src/main/java/testing/my-qrcode.png";
                                 int qrCodeSize = 200;
                                 try {
@@ -214,7 +210,6 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                                     icon = new ImageIcon("./src/main/java/testing/my-qrcode.png");
 
                                     BufferedImage qrImage = ImageIO.read(new File(outputPath));
-
                                     SwingUtilities.invokeLater(() -> {
                                         image.setIcon(new ImageIcon(qrImage));
                                         image.revalidate();
@@ -224,74 +219,55 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
                                     e1.printStackTrace();
                                 }
                             }
-                        } catch(Exception e3){
+                        } catch (Exception e3) {
                             System.err.println("Error parsing GPS data: " + e3.getMessage());
                         }
                     }
                 }
-            
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         }
     }
 
     @Override
     public void removeNotify() {
         super.removeNotify();
-        port.closePort();
+        port.closePort(); // close the serial port when this panel is removed from the UI
     }
 
     public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == submitButton) {
-			subTab2Content.add(l);
+        if (e.getSource() == submitButton) {
+            subTab2Content.add(l);
             int count = 0;
 
-            for (int i = 0; i < (console.getText()).length(); i++){
-                if ((console.getText()).charAt(i) == ' '){
+            // Count the number of spaces to validate the "two-part" prompt format
+            for (int i = 0; i < (console.getText()).length(); i++) {
+                if ((console.getText()).charAt(i) == ' ') {
                     count++;
                 }
             }
 
-            if (count == 1){
-			    l.setText("Sent '" + console.getText() + "'");
-            }
-            else{
+            if (count == 1) {
+                l.setText("Sent '" + console.getText() + "'");
+                    // Send the command over serial — uses UTF_16 encoding (consider whether the receiver expects this)
+                    try (OutputStream out = port.getOutputStream();) {
+                        //byte[] datatosend = (console.getText()).getBytes();
+                        //OutputStream out = port.getOutputStream();
+                        Commands command = new Commands(console.getText());
+                        //Charset charset = StandardCharsets.UTF_16;
+                        byte[] byteToSend = (command.concatenatedCommand).getBytes(StandardCharsets.UTF_16); // use another charset?
+                        out.write(byteToSend);
+                        out.flush();
+                        String sent = new String(byteToSend, StandardCharsets.UTF_16);
+                        System.out.println("Sent data: " + sent);
+                        //System.out.println(byteToSend);
+                    } catch (Exception e1) {
+                        System.err.println("Error sending data: " + e1.getMessage());
+                    }
+            } else {
                 l.setText("'" + console.getText() + "' didn't send as it doesn't fit the prompt format. Try again.");
             }
-            //Commands command = new Commands(console.getText());
-            //byte[] byteToSend = (command.concatenatedCommand).getBytes();
-			/*cool.setHorizontalAlignment(SwingConstants.CENTER);
-				subTab2Content.add(cool, BorderLayout.CENTER);
-				mainPanel.revalidate();*/
-           /*  try (OutputStream out = port.getOutputStream();) {
-                //byte[] datatosend = (console.getText()).getBytes();
-                //OutputStream out = port.getOutputStream();
-                out.write(byteToSend);
-                out.flush();
-                String sent = new String(byteToSend);
-                System.out.println("Sent data: " + sent);
-            }
-         catch(Exception e1){
-                System.err.println("Error sending data: " + e1.getMessage());
-            }*/
-		}
-        try (OutputStream out = port.getOutputStream();) { //the command prompt entered must be split into two parts with a space.
-            //byte[] datatosend = (console.getText()).getBytes();
-            //OutputStream out = port.getOutputStream();
-            Commands command = new Commands(console.getText());
-            //Charset charset = StandardCharsets.UTF_16;
-            byte[] byteToSend = (command.concatenatedCommand).getBytes(StandardCharsets.UTF_16); //use another charset?
-            out.write(byteToSend);
-            out.flush();
-            String sent = new String(byteToSend, StandardCharsets.UTF_16);
-            System.out.println("Sent data: " + sent);
-            //System.out.println(byteToSend);
         }
-        catch(Exception e1){
-            System.err.println("Error sending data: " + e1.getMessage());
-        }
-	}
+    }
 }
-
