@@ -27,11 +27,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MainWindow {
+
 	public JFrame frame = new JFrame();
 	JTabbedPane tabbedPane = new JTabbedPane();
 	private final Map<String, SerialTab> activeTabs = new HashMap<>();
 	JPanel mainPanel = new JPanel();
-	private	JPanel	panel1 = new JPanel();
 
 	public MainWindow() {
 		// build and show the UI
@@ -55,19 +55,21 @@ public class MainWindow {
 		});
 	}
 
-
+	//checks for new ports and then adds them using SerialTab
 	private void checkForNewPorts() {
 		for (SerialPort port : SerialPort.getCommPorts()) {
             String portName = port.getSystemPortName();
+			//checks if the tab doesn't already exist and if it is a serial USB input based on the name
 			if (!activeTabs.containsKey(portName) && (portName.contains("cu.usbmodem") || portName.contains("COM"))) {
 				System.out.println("New serial device detected: " + portName);
 				//create the serial tab which will be used for active tabs
 				SerialTab tab = new SerialTab(port);
 
+				//adds the main panel to the frame before adding the tab, this is for if there is not a mainPanel before
 				mainPanel.add(tabbedPane, BorderLayout.CENTER);
 				frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
 
-				//tracks the tabs with activeTabs and adds a tab to the tabbedPane
+				//tracks the tabs with activeTabs and adds a tab to the tabbedPane (which is already in the mainPanel)
 				activeTabs.put(portName, tab);
 				tabbedPane.addTab(portName, tab);
 
@@ -78,6 +80,7 @@ public class MainWindow {
 				frame.repaint();
 			}
 			else{
+				//shows if there is nothing to show or no detections found
 				JLabel label = new JLabel("No compatible USB devices connected. Please try again.");
 				label.setHorizontalAlignment(SwingConstants.CENTER);
 				mainPanel.add(label, BorderLayout.CENTER);
@@ -106,19 +109,5 @@ public class MainWindow {
             }
         }
     }
-
-	//outdated code from previous implentation. It's still a useful reference for UI building!
-	public void itemTabPanel1()
-	{
-		checkForNewPorts();
-		 panel1 = new JPanel(); // default
-            panel1.add(new JLabel("Tab 1 Content"));
-            panel1.add(new JButton("Button 1"));
-		
-		JButton btn2 = new JButton("Button 2");
-		btn2.setBounds(10, 45, 89, 23);
-		panel1.add(btn2);
-		
-	}
 
 }

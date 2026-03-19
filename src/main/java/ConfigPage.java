@@ -3,6 +3,7 @@ import com.fazecast.jSerialComm.SerialPort;
 
 public class ConfigPage {
     //all of these values need to be set since they are currently just placeholders
+    //work in progress page for setting up configs
     public static String BOARD_NAME = "UNKNOWN BOARD"; //string max len under 100 chars // Don't worry about datatype
 
     enum BoardName {

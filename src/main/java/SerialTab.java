@@ -21,12 +21,7 @@ import java.util.List;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
-
-
-
 public class SerialTab extends JPanel implements Runnable, java.awt.event.ActionListener{
-    //public SerialPort[] ports = SerialPort.getCommPorts();
-   // private SerialPort port = ports[0]; //let the user choose 
     private final SerialPort port;
     private final JTextArea textArea = new JTextArea();
     private JTabbedPane subTabbedPane = new JTabbedPane();
@@ -62,19 +57,20 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
         //subTab1Content.setSize();
         //subTab1Content.setBackground(Color.DARK_GRAY);
 
-        ImageIcon icon = new ImageIcon("./src/main/java/testing/my-qrcode.png"); 
-        JLabel image = new JLabel(icon);
-        subTab3Content.add(image);
-
-
+        //What the debug page will display and show
         subTab1Content.setLayout(new BorderLayout());
         subTab1Content.add(new JScrollPane(textArea), BorderLayout.CENTER);
 
+        //What the console page will display and show
         //subTab2Content.setBackground(Color.DARK_GRAY);
 		subTab2Content.add(console);
         subTab2Content.add(l);
     	subTab2Content.add(submitButton);
 
+        //What the QR code page will display and show
+        ImageIcon icon = new ImageIcon("./src/main/java/testing/my-qrcode.png"); 
+        JLabel image = new JLabel(icon);
+        subTab3Content.add(image);
 
         // Start a thread to read data
         new Thread(this).start();
@@ -297,12 +293,5 @@ public class SerialTab extends JPanel implements Runnable, java.awt.event.Action
             System.err.println("Error sending data: " + e1.getMessage());
         }
 	}
-
-
-    /*public void reset(String s){
-        if (s == "--" + ) {
-            //put code here
-        }
-    }*/
 }
 

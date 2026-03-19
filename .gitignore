@@ -3,8 +3,8 @@
 out/
 java-ground-station.iml
 .gradle/
-fileHases.bin
-fileHases.lock
+fileHashes.bin
+fileHashes.lock
 buildOutputCleanup.lock
 executionHistory.lock
 file-system.probe
