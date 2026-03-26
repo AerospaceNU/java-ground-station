@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "PacketUtilsTest",
+            "request": "launch",
+            "mainClass": "PacketUtilsTest",
+            "projectName": "java-ground-station"
+        },
+        {
+            "type": "java",
             "name": "main",
             "request": "launch",
             "mainClass": "main",
