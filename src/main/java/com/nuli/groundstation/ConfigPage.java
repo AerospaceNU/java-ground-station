@@ -1,3 +1,4 @@
+package com.nuli.groundstation;
 
 import com.fazecast.jSerialComm.SerialPort;
 

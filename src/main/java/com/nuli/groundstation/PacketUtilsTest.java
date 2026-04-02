@@ -1,3 +1,5 @@
+package com.nuli.groundstation;
+
 /**
  * Simple round-trip test: build a message, encode it into a framed packet,
  * decode it back, and verify the fields survived the trip.

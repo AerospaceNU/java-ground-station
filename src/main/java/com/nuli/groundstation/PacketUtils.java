@@ -1,6 +1,11 @@
+package com.nuli.groundstation;
+
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.nuli.proto.NULIMessageProto.NULIMessage;
 
 /**
  * Generic framed packet encoder/decoder.
@@ -57,6 +62,32 @@ public class PacketUtils {
     public interface PayloadCodec<T> {
         byte[] serialize(T message) throws PacketException;
         T deserialize(byte[] data) throws PacketException;
+    }
+
+    // --- Built-in NULIMessage codec ---
+    /**
+     * PayloadCodec for NULIMessage protobuf messages.
+     * Use: new PacketUtils.NULIMessageCodec()
+     */
+    public static class NULIMessageCodec implements PayloadCodec<NULIMessage> {
+
+        @Override
+        public byte[] serialize(NULIMessage message) throws PacketException {
+            try {
+                return message.toByteArray();
+            } catch (Exception e) {
+                throw new PacketException("Protobuf serialization failed", e);
+            }
+        }
+
+        @Override
+        public NULIMessage deserialize(byte[] data) throws PacketException {
+            try {
+                return NULIMessage.parseFrom(data);
+            } catch (InvalidProtocolBufferException e) {
+                throw new PacketException("Protobuf deserialization failed", e);
+            }
+        }
     }
 
     // --- Encode ---
