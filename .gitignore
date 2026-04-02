@@ -3,6 +3,7 @@
 out/
 java-ground-station.iml
 .gradle/
+build/
 fileHashes.bin
 fileHashes.lock
 buildOutputCleanup.lock
